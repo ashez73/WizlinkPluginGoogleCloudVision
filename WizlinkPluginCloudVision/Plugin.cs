@@ -12,7 +12,7 @@ namespace WizlinkPluginCloudVision
     {
         [Description("Performs OCR on the provided image and returns the result")]
         [return: TupleDescription(new string[] { "Data", "Confidence" })]
-        public async Task<(string ocrResult, float overallConfidence)> PerformOCR(string imagePath, string apiKey, CancellationToken cancellationToken)
+        public async Task<(string ocrResult, string description)> PerformOCR(string imagePath, string apiKey, CancellationToken cancellationToken)
         {
             string requestUri = "https://vision.googleapis.com/v1/images:annotate?key=" + apiKey;
             using (var client = new HttpClient())
@@ -30,14 +30,17 @@ namespace WizlinkPluginCloudVision
                     base.Log($"Log from plugin: {response:StatusCode}");
                     string jsonResponse = await response.Content.ReadAsStringAsync();
                     var responseObject = JsonSerializer.Deserialize<Responses>(jsonResponse);
-                    float overallConfidence = responseObject.responses[0].fullTextAnnotation.pages[0].confidence;
-                    string peselPATH = responseObject.responses[0].textAnnotations[0].description;
-                    peselPATH.Replace("\n", "");
-                    int indexPESEL = peselPATH.IndexOf("PESEL 1");
-                    if (indexPESEL != -1) { myPESEL = peselPATH.Substring(indexPESEL + 7, 12);
+                    string desc = responseObject.responses[0].textAnnotations[0].description;
+                    desc.Replace("\n", "");
+                    int indexPESEL = desc.IndexOf("PESEL 1");
+                    if (indexPESEL != -1) { myPESEL = desc.Substring(indexPESEL + 7, 12);
                         base.Log($"Log from plugin: PESEL1 position found");
-                    } 
-                    return (myPESEL, overallConfidence);
+                    }
+                    else
+                    {
+                        base.Log($"Log from plugin: PESEL1 position NOT found");
+                    }
+                    return (myPESEL, desc);
                 }
                 else
                 {
@@ -55,7 +58,6 @@ namespace WizlinkPluginCloudVision
     public class Response
     {
         public TextAnnotation[] textAnnotations { get; set; }
-        public FullTextAnnotation fullTextAnnotation { get; set; }
     }
 
     public class TextAnnotation
@@ -63,14 +65,5 @@ namespace WizlinkPluginCloudVision
         public string description { get; set; }
     }
 
-    public class FullTextAnnotation
-    {
-        public string text { get; set; }
-        public Page[] pages { get; set; }
-    }
 
-    public class Page
-    {
-        public float confidence { get; set; }
-    }
 }
