@@ -11,7 +11,7 @@ namespace WizlinkPluginCloudVision
     public class Plugin : PluginBase
     {
         [Description("Performs OCR on the provided image and returns the result")]
-        [return: TupleDescription(new string[] { "Data", "Confidence" })]
+        [return: TupleDescription(new string[] { "PESEL", "Description" })]
         public async Task<(string ocrResult, string description)> PerformOCR(string imagePath, string apiKey, CancellationToken cancellationToken)
         {
             string requestUri = "https://vision.googleapis.com/v1/images:annotate?key=" + apiKey;
