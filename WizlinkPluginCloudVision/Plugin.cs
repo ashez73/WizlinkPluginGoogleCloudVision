@@ -20,7 +20,8 @@ namespace WizlinkPluginCloudVision
                 byte[] imageBytes = System.IO.File.ReadAllBytes(imagePath);
                 string imageContent = Convert.ToBase64String(imageBytes);
 
-                string jsonRequest = $"{{\"requests\":[{{\"image\":{{\"content\":\"{imageContent}\"}},\"features\":[{{\"type\":\"DOCUMENT_TEXT_DETECTION\"}}]}}]}}";
+                string jsonRequest = $"{{\"requests\":[{{\"image\":{{\"content\":\"{imageContent}\"}},\"features\":[{{\"type\":\"DOCUMENT_TEXT_DETECTION\"}}],\"imageContext\":{{\"languageHints\":[\"pl-t-i0-handwrit\"]}}}}]}}";
+
                 StringContent content = new StringContent(jsonRequest, System.Text.Encoding.UTF8, "application/json");
 
                 HttpResponseMessage response = await client.PostAsync(requestUri, content, cancellationToken);
